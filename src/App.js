@@ -2,15 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Alert } from './components/Alert';
 import { ExpenseList } from './components/ExpenseList';
 import { ExpenseForm } from './components/ExpenseForm';
-import { v4 as uuidv4 } from 'uuid';
-
+// import { v4 as uuidv4 } from 'uuid';
+const axios = require('axios');
 // const initialExprensesData = [
 //   { id: uuidv4(), charge: "rent", amount: 5600 },
 //   { id: uuidv4(), charge: "car", amount: 1600 },
 //   { id: uuidv4(), charge: "bike", amount: 600 },
 // ]
 
-const initialExprensesData = localStorage.getItem('expenses') ? JSON.parse(localStorage.getItem('expenses')) : [];
+// const initialExprensesData = localStorage.getItem('expenses') ? JSON.parse(localStorage.getItem('expenses')) : [];
+
+const initialExprensesData = [];
+
 function App() {
   // *********************** State values *********************** //
   const [expenses, setExpenses] = useState(initialExprensesData);
@@ -24,8 +27,12 @@ function App() {
   const [id, setId] = useState(0);
 
   useEffect(() => {
-    localStorage.setItem('expenses', JSON.stringify(expenses));
-  }, [expenses])
+    // localStorage.setItem('expenses', JSON.stringify(expenses));
+    axios.get('http://localhost:3006/budgetCal').then(function (response) {
+      const data = response.data.data;
+      setExpenses(data);
+    })
+  }, [])
 
   const handleCharge = (e) => {
     setCharge(e.target.value);
@@ -46,16 +53,38 @@ function App() {
     e.preventDefault();
     if (charge !== '' && amount > 0) {
       if (edit) {
-        let tempExpenses = expenses.map((exp) => { return exp.id === id ? { ...exp, charge, amount } : exp });
-        setExpenses(tempExpenses);
-        handleAlert({ type: "success", text: 'item edited !' });
-        setEdit(false);
+        // let tempExpenses = expenses.map((exp) => { return exp.id === id ? { ...exp, charge, amount } : exp });
+        // setExpenses(tempExpenses);
+        // handleAlert({ type: "success", text: 'item edited !' });
+        // setEdit(false);
+
+        const payload = {
+          charge: charge,
+          amount: amount
+        }
+        axios.patch(`http://localhost:3006/budgetCal/${id}`, payload).then(function (response) {
+          let tempExpenses = expenses.map((exp) => { return exp._id === id ? { ...exp, charge, amount } : exp });
+          setExpenses(tempExpenses);
+          handleAlert({ type: "success", text: 'item edited !' });
+          setEdit(false);
+        })
       } else {
-        const singleExpense = { id: uuidv4(), charge, amount };
-        const concatDataArray = expenses.concat(singleExpense);
-        //[...expenses, singleExpense];
-        setExpenses(concatDataArray);
-        handleAlert({ type: "success", text: 'item added !' });
+        // const singleExpense = { id: uuidv4(), charge, amount };
+        // const concatDataArray = expenses.concat(singleExpense);
+        // //[...expenses, singleExpense];
+        // setExpenses(concatDataArray);
+        const payload = {
+          charge: charge,
+          amount: amount,
+        }
+        axios.post('http://localhost:3006/budgetCal', payload).then(function (response) {
+          const concatDataArray = expenses.concat(payload);
+          setExpenses(concatDataArray);
+          handleAlert({ type: "success", text: 'item added !' });
+          window.location.reload();
+        }).catch(function (error) {
+          console.log(error);
+        });
       }
       setCharge('');
       setAmount('');
@@ -71,13 +100,25 @@ function App() {
   }
 
   const handleDeleted = (id) => {
-    let tempExpenses = expenses.filter(item => item.id !== id);
-    setExpenses(tempExpenses);
-    handleAlert({ type: "success", text: 'item deleted' })
+    // let tempExpenses = expenses.filter(item => item.id !== id);
+    // setExpenses(tempExpenses);
+    // handleAlert({ type: "success", text: 'item deleted' })
+
+    axios.delete(`http://localhost:3006/budgetCal/${id}`).then(function (response) {
+      let tempExpenses = expenses.filter(item => item._id !== id);
+      setExpenses(tempExpenses);
+      handleAlert({ type: "success", text: 'item deleted' })
+    })
   }
 
   const handleEdit = (id) => {
-    let expense = expenses.find(item => item.id === id);
+    // let expense = expenses.find(item => item.id === id);
+    // let { charge, amount } = expense;
+    // setCharge(charge);
+    // setAmount(amount);
+    // setEdit(true);
+    // setId(id);
+    let expense = expenses.find(item => item._id === id);
     let { charge, amount } = expense;
     setCharge(charge);
     setAmount(amount);
