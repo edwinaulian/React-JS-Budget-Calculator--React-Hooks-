@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Alert } from './components/Alert';
 import { ExpenseList } from './components/ExpenseList';
 import { ExpenseForm } from './components/ExpenseForm';
-// import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 const axios = require('axios');
 // const initialExprensesData = [
 //   { id: uuidv4(), charge: "rent", amount: 5600 },
@@ -74,6 +74,7 @@ function App() {
         // //[...expenses, singleExpense];
         // setExpenses(concatDataArray);
         const payload = {
+          _id: uuidv4(),
           charge: charge,
           amount: amount,
         }
@@ -81,7 +82,7 @@ function App() {
           const concatDataArray = expenses.concat(payload);
           setExpenses(concatDataArray);
           handleAlert({ type: "success", text: 'item added !' });
-          window.location.reload();
+          // window.location.reload();
         }).catch(function (error) {
           console.log(error);
         });

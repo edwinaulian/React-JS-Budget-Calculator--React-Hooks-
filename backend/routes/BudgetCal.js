@@ -16,6 +16,7 @@ router.get('/', async (req, res) => {
 // SUBMMIT NEW DATA ON TABLE POST
 router.post('/', async (req, res) => {
     const post = new Post({
+        _id: req.body._id,
         charge: req.body.charge,
         amount: req.body.amount
     });

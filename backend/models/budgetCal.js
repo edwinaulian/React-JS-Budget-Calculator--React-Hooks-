@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const BudgetCal = mongoose.Schema({
+    _id: {
+        type: String,
+        required: true
+    },
     charge: {
         type: String, 
         required: true
